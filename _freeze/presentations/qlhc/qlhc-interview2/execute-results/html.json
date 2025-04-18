@@ -1,0 +1,12 @@
+{
+  "hash": "eaafe45d4efca9d244206617cced91c0",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Implementing the BARTverse\"\nauthor:\n  - name: \"[Ajinkya Kokandakar](https://ajinkya-k.github.io)\"\n    email: ajinkya@stat.wisc.edu\n    orcid: 0000-0001-6628-2272\n    affiliations:\n      - name: '<ins>ajinkya-k.github.io</ins>'\n        city: Madison\n        state: WI\n        url: https://ajinkya-k.github.io\n        department: Statistics\ndate: \"2025-02-26\"\nformat:\n  revealjs:\n      slide-number: true\n      smaller: true\n      progress: true\n---\n\n\n## Follow-up: Forcing a split on a variable\n\n\n\n1. If the variable is binary, use BCF:\n\\begin{align}\n    \\mathbb{E}(Y | X = x, Z = z) &= f(x) + z \\cdot g(x) \\\\\n        &= \\begin{cases}\n            f(x) && \\text{if } z = 0 \\\\\n            f(x) + g(x) && \\text{if } z = 1\n        \\end{cases} ,\n\\end{align}\nso the \"treatment effect\" is $g(x)$\n<br/>\n2. If we have a continuous variable,\n   - initialize the trees to be split on that variable\n   - Use initialized trees in the MCMC\n\nThe `flexBART` package, _can_ start at any arbitrarily initialized trees.\n\n\n## Work in progress\n\n- Use a Laplace approximation when updating trees.\n- This is useful beacause we can use a single formulation for any expoential family\n- This also means we can reuse _a lot_ of the code\n- For any model $y ~ f(x; \\theta)$ we simply need:\n  1.  first log-derivative w.r.t parameters, i.e. the score function $\\displaystyle \\frac{\\partial \\log f}{\\partial \\theta}$\n  2.  second log-derivative w.r.t parameters, i.e.  $\\displaystyle \\frac{\\partial^2 \\log f}{\\partial \\theta^2}$\n\n\n## Exploiting the generality\n\nWe can reuse a lot of code by using an abstract class in `C++`\n\n```{cpp}\nclass Model {\npublic:\n    virtual double score(double y, double θ) = 0;\n    virtual double jacobian(double y, double θ) = 0;\n\n    double draw_proposal(double y);\n}\n```\n\nFor each specific distribution say Poisson implement the score and jacobian functions:\n\n```{c++}\nclass Poisson: Model {\npublic:\n    virtual double score(double y, double θ) { return (y / θ - 1) };\n    virtual double jacobian(double y, double θ) { 1 / θ };\n}\n```\n\n",
+    "supporting": [
+      "qlhc-interview2_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
